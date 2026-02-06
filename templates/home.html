@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}🏠{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block header_actions %}
+    <a href="{% url 'rotation:generate' %}" class="btn btn-primary">
+        <span>➕</span>
+        <span>New Plan</span>
+    </a>
+{% endblock %}
+
+{% block content %}
+    <!-- Stats Overview -->
+    <div class="grid grid-4 mb-2">
+        <div class="stat-card">
+            <div class="stat-icon">🌾</div>
+            <div class="stat-content">
+                <h3>{{ total_fields|default:0 }}</h3>
+                <p>Total Fields</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">🔄</div>
+            <div class="stat-content">
+                <h3>{{ active_plans|default:0 }}</h3>
+                <p>Active Plans</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">🌍</div>
+            <div class="stat-content">
+                <h3>{{ soil_analyses|default:0 }}</h3>
+                <p>Soil Analyses</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-content">
+                <h3>{{ avg_score|default:"N/A" }}</h3>
+                <p>Avg. Plan Score</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Welcome Section -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Welcome to Smart Crop Planner</h3>
+        </div>
+        <div class="card-body">
+            <p>
+                Our AI-driven platform helps you optimize crop planning and rotation strategies 
+                based on soil health, historical data, and climate patterns. Get started by:
+            </p>
+            <div class="grid grid-3 mt-2">
+                <div class="card" style="background: linear-gradient(135deg, #a8d08d 0%, #6faa3e 100%); color: white;">
+                    <h4 style="color: white; margin-bottom: 0.5rem;">1️⃣ Add Your Fields</h4>
+                    <p style="color: rgba(255,255,255,0.9); margin-bottom: 1rem;">
+                        Start by adding information about your farm fields including location, size, and soil type.
+                    </p>
+                    <a href="{% url 'field_create' %}" class="btn btn-secondary">Add Field</a>
+                </div>
+                
+                <div class="card" style="background: linear-gradient(135deg, #6faa3e 0%, #4a7c2c 100%); color: white;">
+                    <h4 style="color: white; margin-bottom: 0.5rem;">2️⃣ Analyze Soil</h4>
+                    <p style="color: rgba(255,255,255,0.9); margin-bottom: 1rem;">
+                        Record soil analysis data to understand nutrient levels and fertility status.
+                    </p>
+                    <a href="{% url 'soil_analysis_create' %}" class="btn btn-secondary">Add Analysis</a>
+                </div>
+                
+                <div class="card" style="background: linear-gradient(135deg, #4a7c2c 0%, #2d5016 100%); color: white;">
+                    <h4 style="color: white; margin-bottom: 0.5rem;">3️⃣ Get AI Recommendations</h4>
+                    <p style="color: rgba(255,255,255,0.9); margin-bottom: 1rem;">
+                        Let our AI engine recommend optimal crop rotation plans for sustainable farming.
+                    </p>
+                    <a href="{% url 'rotation:generate' %}" class="btn btn-secondary">Create Plan</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="grid grid-2">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Fields</h3>
+                <a href="{% url 'field_list' %}" class="btn btn-secondary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_fields %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Field Name</th>
+                                <th>Size (acres)</th>
+                                <th>Soil Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for field in recent_fields %}
+                                <tr>
+                                    <td>{{ field.name }}</td>
+                                    <td>{{ field.size_acres }}</td>
+                                    <td>{{ field.soil_type }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="text-center p-3">
+                        <p class="muted-text">No fields added yet. Get started by adding your first field!</p>
+                        <a href="{% url 'field_create' %}" class="btn btn-primary mt-1">Add First Field</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Active Rotation Plans</h3>
+                <a href="{% url 'rotation:plan_list' %}" class="btn btn-secondary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if active_rotation_plans %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Plan Name</th>
+                                <th>Field</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for plan in active_rotation_plans %}
+                                <tr>
+                                    <td>{{ plan.plan_name }}</td>
+                                    <td>{{ plan.field.name }}</td>
+                                    <td><span class="badge badge-success">{{ plan.status }}</span></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="text-center p-3">
+                        <p class="muted-text">No active plans yet. Create your first AI-powered rotation plan!</p>
+                        <a href="{% url 'rotation:generate' %}" class="btn btn-primary mt-1">Create Plan</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features Overview -->
+    <div class="card mt-2">
+        <div class="card-header">
+            <h3 class="card-title">Platform Features</h3>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-4">
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🌾</div>
+                    <h4>Field Management</h4>
+                    <p class="muted-text">Track all your farm fields and crop history in one place</p>
+                </div>
+                
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🌍</div>
+                    <h4>Soil Analysis</h4>
+                    <p class="muted-text">Monitor soil fertility and get nutrient recommendations</p>
+                </div>
+                
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🌤️</div>
+                    <h4>Climate Assessment</h4>
+                    <p class="muted-text">Evaluate seasonal suitability for different crops</p>
+                </div>
+                
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🤖</div>
+                    <h4>AI Planning</h4>
+                    <p class="muted-text">Get intelligent crop rotation recommendations</p>
+                </div>
+                
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔄</div>
+                    <h4>Compatibility Scoring</h4>
+                    <p class="muted-text">Analyze crop compatibility and rotation effectiveness</p>
+                </div>
+                
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">📈</div>
+                    <h4>Yield Prediction</h4>
+                    <p class="muted-text">Forecast yields and soil health impacts</p>
+                </div>
+                
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">📊</div>
+                    <h4>Visualizations</h4>
+                    <p class="muted-text">Interactive charts and planning dashboards</p>
+                </div>
+                
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">📄</div>
+                    <h4>Reports</h4>
+                    <p class="muted-text">Generate comprehensive PDF planning reports</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Soil Analysis - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}🗑️{% endblock %}
+{% block page_title %}Delete Soil Analysis{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ <a href="{% url 'soil_analysis_list' %}">Soil Analysis</a></span>
+    <span>/ <a href="{% url 'soil_analysis_detail' soil_analysis.pk %}">{{ soil_analysis.field.name }}</a></span>
+    <span>/ Delete</span>
+{% endblock %}
+
+{% block content %}
+    <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-header">
+            <h3 class="card-title" style="color: #e74c3c;">⚠️ Confirm Deletion</h3>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger">
+                <strong>Warning:</strong> This action cannot be undone!
+            </div>
+            
+            <p>Are you sure you want to delete the soil analysis for <strong>"{{ soil_analysis.field.name }}"</strong>?</p>
+            
+            <div style="background: var(--light-gray); padding: 1rem; border-radius: var(--radius-md); margin: 1.5rem 0;">
+                <h4 style="margin-bottom: 0.5rem;">Analysis Details:</h4>
+                <ul style="margin: 0; padding-left: 1.5rem;">
+                    <li>Field: {{ soil_analysis.field.name }}</li>
+                    <li>Date: {{ soil_analysis.analysis_date|date:"F d, Y" }}</li>
+                    <li>pH: {{ soil_analysis.ph_level }}</li>
+                    <li>Organic Matter: {{ soil_analysis.organic_matter }}%</li>
+                    <li>NPK: {{ soil_analysis.nitrogen_ppm }} - {{ soil_analysis.phosphorus_ppm }} - {{ soil_analysis.potassium_ppm }} ppm</li>
+                    <li>Recommendations: {{ soil_analysis.recommendations.count }}</li>
+                </ul>
+            </div>
+            
+            {% if soil_analysis.recommendations.count > 0 %}
+                <div class="alert alert-warning">
+                    <strong>Note:</strong> This analysis has {{ soil_analysis.recommendations.count }} nutrient recommendation{{ soil_analysis.recommendations.count|pluralize }}. 
+                    All recommendations will also be deleted.
+                </div>
+            {% endif %}
+            
+            <form method="post" style="margin-top: 2rem;">
+                {% csrf_token %}
+                <div class="d-flex justify-between">
+                    <a href="{% url 'soil_analysis_detail' soil_analysis.pk %}" class="btn btn-secondary">
+                        <span>←</span>
+                        <span>Cancel</span>
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <span>🗑️</span>
+                        <span>Delete Analysis</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

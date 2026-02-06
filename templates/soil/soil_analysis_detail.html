@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Soil Analysis - {{ soil_analysis.field.name }} - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}🌍{% endblock %}
+{% block page_title %}Soil Analysis - {{ soil_analysis.field.name }}{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ <a href="{% url 'soil_analysis_list' %}">Soil Analysis</a></span>
+    <span>/ {{ soil_analysis.field.name }}</span>
+{% endblock %}
+
+{% block header_actions %}
+    <div class="d-flex gap-1">
+        <a href="{% url 'regenerate_recommendations' soil_analysis.pk %}" class="btn btn-success">
+            <span>🔄</span>
+            <span>Regenerate</span>
+        </a>
+        <a href="{% url 'soil_analysis_update' soil_analysis.pk %}" class="btn btn-warning">
+            <span>✏️</span>
+            <span>Edit</span>
+        </a>
+        <a href="{% url 'soil_analysis_delete' soil_analysis.pk %}" class="btn btn-danger">
+            <span>🗑️</span>
+            <span>Delete</span>
+        </a>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <!-- Health Score Card -->
+    <div class="card mb-2" style="background: linear-gradient(135deg, {% if health_score >= 85 %}#6faa3e{% elif health_score >= 70 %}#a8d08d{% elif health_score >= 55 %}#f4c430{% else %}#e74c3c{% endif %} 0%, var(--primary-green) 100%); color: white;">
+        <div class="card-body text-center" style="padding: 2rem;">
+            <h2 style="color: white; margin: 0; font-size: 3rem;">{{ health_score }}/100</h2>
+            <h3 style="color: rgba(255,255,255,0.9); margin: 0.5rem 0;">Soil Health Score</h3>
+            <p style="color: rgba(255,255,255,0.8); font-size: 1.2rem; margin: 0;"><strong>Rating: {{ health_rating }}</strong></p>
+        </div>
+    </div>
+    
+    <!-- Analysis Information -->
+    <div class="grid grid-2 mb-2">
+        <!-- Basic Data -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Analysis Information</h3>
+            </div>
+            <div class="card-body">
+                <table style="width: 100%;">
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Field</td>
+                        <td style="padding: 0.75rem;">
+                            <a href="{% url 'field_detail' soil_analysis.field.pk %}" style="color: var(--secondary-green); font-weight: 600;">
+                                {{ soil_analysis.field.name }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Analysis Date</td>
+                        <td style="padding: 0.75rem;">{{ soil_analysis.analysis_date|date:"F d, Y" }}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">pH Level</td>
+                        <td style="padding: 0.75rem;">
+                            <span class="badge {% if ph_status == 'Neutral' %}badge-success{% else %}badge-warning{% endif %}">
+                                {{ soil_analysis.ph_level }} - {{ ph_status }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Organic Matter</td>
+                        <td style="padding: 0.75rem;">
+                            <span class="badge {% if om_status == 'High' %}badge-success{% elif om_status == 'Medium' %}badge-warning{% else %}badge-danger{% endif %}">
+                                {{ soil_analysis.organic_matter }}% - {{ om_status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% if soil_analysis.cec %}
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">CEC</td>
+                        <td style="padding: 0.75rem;">{{ soil_analysis.cec }} meq/100g</td>
+                    </tr>
+                    {% endif %}
+                    {% if soil_analysis.moisture_content %}
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Moisture</td>
+                        <td style="padding: 0.75rem;">{{ soil_analysis.moisture_content }}%</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Laboratory</td>
+                        <td style="padding: 0.75rem;">{{ soil_analysis.lab_name|default:"Not specified" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Macronutrients NPK -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Macronutrients (N-P-K)</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-3 gap-2 mb-2">
+                    <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #4a7c2c 0%, #2d5016 100%); border-radius: var(--radius-lg); color: white;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">N</div>
+                        <h4 style="color: white; margin: 0;">{{ soil_analysis.nitrogen_ppm }}</h4>
+                        <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 0.85rem;">ppm</p>
+                        <span class="badge {% if nutrient_levels.nitrogen == 'High' %}badge-success{% elif nutrient_levels.nitrogen == 'Medium' %}badge-warning{% else %}badge-danger{% endif %}" style="margin-top: 0.5rem;">
+                            {{ nutrient_levels.nitrogen }}
+                        </span>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #6faa3e 0%, #4a7c2c 100%); border-radius: var(--radius-lg); color: white;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">P</div>
+                        <h4 style="color: white; margin: 0;">{{ soil_analysis.phosphorus_ppm }}</h4>
+                        <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 0.85rem;">ppm</p>
+                        <span class="badge {% if nutrient_levels.phosphorus == 'High' %}badge-success{% elif nutrient_levels.phosphorus == 'Medium' %}badge-warning{% else %}badge-danger{% endif %}" style="margin-top: 0.5rem;">
+                            {{ nutrient_levels.phosphorus }}
+                        </span>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #a8d08d 0%, #6faa3e 100%); border-radius: var(--radius-lg); color: white;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">K</div>
+                        <h4 style="color: white; margin: 0;">{{ soil_analysis.potassium_ppm }}</h4>
+                        <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 0.85rem;">ppm</p>
+                        <span class="badge {% if nutrient_levels.potassium == 'High' %}badge-success{% elif nutrient_levels.potassium == 'Medium' %}badge-warning{% else %}badge-danger{% endif %}" style="margin-top: 0.5rem;">
+                            {{ nutrient_levels.potassium }}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Micronutrients if available -->
+                {% if soil_analysis.calcium_ppm or soil_analysis.magnesium_ppm or soil_analysis.sulfur_ppm %}
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 2px solid var(--medium-gray);">
+                    <h4>Micronutrients</h4>
+                    <div class="grid grid-3 gap-1">
+                        {% if soil_analysis.calcium_ppm %}
+                        <div style="padding: 0.75rem; background: var(--light-gray); border-radius: var(--radius-md); text-align: center;">
+                            <strong>Ca:</strong> {{ soil_analysis.calcium_ppm }} ppm
+                        </div>
+                        {% endif %}
+                        {% if soil_analysis.magnesium_ppm %}
+                        <div style="padding: 0.75rem; background: var(--light-gray); border-radius: var(--radius-md); text-align: center;">
+                            <strong>Mg:</strong> {{ soil_analysis.magnesium_ppm }} ppm
+                        </div>
+                        {% endif %}
+                        {% if soil_analysis.sulfur_ppm %}
+                        <div style="padding: 0.75rem; background: var(--light-gray); border-radius: var(--radius-md); text-align: center;">
+                            <strong>S:</strong> {{ soil_analysis.sulfur_ppm }} ppm
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recommendations -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Nutrient Recommendations</h3>
+            <span class="badge badge-success">{{ recommendations.count }} recommendation{{ recommendations.count|pluralize }}</span>
+        </div>
+        <div class="card-body">
+            {% if recommendations %}
+                {% for rec in recommendations %}
+                    <div class="card mb-2" style="border-left: 4px solid {% if rec.priority >= 8 %}#e74c3c{% elif rec.priority >= 5 %}#f4c430{% else %}#6faa3e{% endif %};">
+                        <div class="card-body">
+                            <div class="d-flex justify-between align-center mb-1">
+                                <h4 style="margin: 0; color: var(--primary-green);">{{ rec.get_nutrient_display }}</h4>
+                                <div class="d-flex gap-1 align-center">
+                                    <span class="badge {% if rec.current_level == 'low' %}badge-danger{% elif rec.current_level == 'medium' %}badge-warning{% else %}badge-success{% endif %}">
+                                        {{ rec.get_current_level_display }}
+                                    </span>
+                                    <span class="badge badge-info">Priority: {{ rec.priority }}/10</span>
+                                </div>
+                            </div>
+                            <p style="margin: 0.5rem 0; color: var(--text-secondary);">{{ rec.recommended_action }}</p>
+                            {% if rec.application_rate %}
+                                <div style="margin-top: 0.5rem; padding: 0.5rem; background: var(--light-gray); border-radius: var(--radius-sm);">
+                                    <strong>Application Rate:</strong> {{ rec.application_rate }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center muted-text">No recommendations generated. Click "Regenerate" to create recommendations.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Notes -->
+    {% if soil_analysis.notes %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Additional Notes</h3>
+        </div>
+        <div class="card-body">
+            <p style="margin: 0;">{{ soil_analysis.notes }}</p>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}

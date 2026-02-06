@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Crop Recommendations{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>💡 Crop Recommendations</h1>
+            <p>AI-powered crop suggestions based on field data and conditions</p>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Recommendations -->
+<div class="card">
+    <div class="card-header">
+        <h2>Generate New Recommendations</h2>
+    </div>
+    <div class="card-body">
+        <form method="get" action="{% url 'generate_recommendations' 0 %}">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Select Field</label>
+                    <select name="field_id" class="form-control" required>
+                        <option value="">Choose a field...</option>
+                        {% for field in fields %}
+                        <option value="{{ field.pk }}">{{ field.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">🤖 Generate Recommendations</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Existing Recommendations -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>All Recommendations</h2>
+    </div>
+    <div class="card-body">
+        {% if recommendations %}
+        <div class="grid-2">
+            {% for rec in recommendations %}
+            <div class="card">
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <h3 style="margin-top: 0;">{{ rec.recommended_crop }}</h3>
+                        <span class="badge badge-success">{{ rec.confidence_score }}% confidence</span>
+                    </div>
+                    
+                    {% if rec.recommended_variety %}
+                    <p><strong>Variety:</strong> {{ rec.recommended_variety }}</p>
+                    {% endif %}
+                    
+                    <p><strong>Field:</strong> {{ rec.field.name }}</p>
+                    <p><strong>Season:</strong> {{ rec.get_planting_season_display }}</p>
+                    
+                    {% if rec.ideal_planting_window_start %}
+                    <p><strong>Planting Window:</strong> {{ rec.ideal_planting_window_start }} to {{ rec.ideal_planting_window_end }}</p>
+                    {% endif %}
+                    
+                    {% if rec.expected_yield_range %}
+                    <p><strong>Expected Yield:</strong> {{ rec.expected_yield_range }}</p>
+                    {% endif %}
+                    
+                    <div style="margin-top: 1rem; padding: 1rem; background: #e3f2fd; border-radius: 6px;">
+                        <strong>💡 Reasoning:</strong>
+                        <p style="margin: 0.5rem 0 0 0;">{{ rec.reasoning }}</p>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <a href="{% url 'schedule_from_recommendation' rec.pk %}" class="btn btn-sm btn-success">📅 Schedule This Crop</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">💡</div>
+            <h2>No Recommendations Yet</h2>
+            <p>Generate AI-powered crop recommendations for your fields.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

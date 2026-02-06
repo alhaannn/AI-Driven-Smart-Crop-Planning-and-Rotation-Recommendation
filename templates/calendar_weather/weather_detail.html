@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Weather Detail{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>⛅ Weather Data - {{ weather.date }}</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="grid-2">
+            <div>
+                <h3>Basic Information</h3>
+                <p><strong>Field:</strong> {{ weather.field.name }}</p>
+                <p><strong>Date:</strong> {{ weather.date }}</p>
+                <p><strong>Condition:</strong> {{ weather.get_condition_display }}</p>
+                <p><strong>Data Source:</strong> {% if weather.is_manual %}Manual Entry{% else %}API{% endif %}</p>
+            </div>
+            
+            <div>
+                <h3>Measurements</h3>
+                <p><strong>Temperature High:</strong> {{ weather.temperature_high }}°C</p>
+                <p><strong>Temperature Low:</strong> {{ weather.temperature_low }}°C</p>
+                <p><strong>Average:</strong> {{ weather.get_avg_temperature }}°C</p>
+                <p><strong>Rainfall:</strong> {{ weather.rainfall_mm }} mm</p>
+                <p><strong>Humidity:</strong> {{ weather.humidity_percent }}%</p>
+                <p><strong>Wind Speed:</strong> {{ weather.wind_speed_kmh }} km/h</p>
+            </div>
+        </div>
+        
+        {% if weather.notes %}
+        <div style="margin-top: 1.5rem;">
+            <h3>Notes</h3>
+            <p>{{ weather.notes }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="form-actions" style="margin-top: 1.5rem;">
+            <a href="{% url 'weather_update' weather.pk %}" class="btn">Edit</a>
+            <a href="{% url 'weather_delete' weather.pk %}" class="btn btn-danger">Delete</a>
+            <a href="{% url 'weather_list' %}" class="btn">Back to List</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

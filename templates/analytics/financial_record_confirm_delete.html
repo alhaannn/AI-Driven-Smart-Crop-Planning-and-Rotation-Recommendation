@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Financial Record{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>⚠️ Delete Financial Record</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <strong>Warning:</strong> You are about to delete this financial record. This action cannot be undone!
+        </div>
+        
+        <h3>{{ record.get_transaction_type_display }}: {{ record.get_category_display }}</h3>
+        <p><strong>Amount:</strong> ${{ record.amount }}</p>
+        <p><strong>Date:</strong> {{ record.date }}</p>
+        {% if record.description %}<p><strong>Description:</strong> {{ record.description }}</p>{% endif %}
+        
+        <form method="post" style="margin-top: 2rem;">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">Yes, Delete This Record</button>
+                <a href="{% url 'analytics:financial_overview' %}" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

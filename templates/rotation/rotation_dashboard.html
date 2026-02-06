@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}Crop Rotation Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>🔄 Crop Rotation Planning Dashboard</h1>
+    <p>Intelligent multi-year crop rotation management and AI-powered recommendations</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ total_plans }}</div>
+            <div class="stat-label">Total Plans</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ active_plans_count }}</div>
+            <div class="stat-label">Active Plans</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ total_benefits }}</div>
+            <div class="stat-label">Expected Benefits</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ verified_benefits }}</div>
+            <div class="stat-label">Verified Benefits</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>Quick Actions</h2>
+    </div>
+    <div class="card-body">
+        <div class="grid-2">
+            <a href="{% url 'rotation:generate' %}" class="btn btn-primary">
+                🤖 Generate AI Rotation Plan
+            </a>
+            <a href="{% url 'rotation:plan_create' %}" class="btn btn-success">
+                ➕ Create Manual Plan
+            </a>
+            <a href="{% url 'rotation:plan_list' %}" class="btn">
+                📋 View All Plans
+            </a>
+            <a href="{% url 'rotation:benefit_list' %}" class="btn">
+                🎯 View All Benefits
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Active Rotation Plans -->
+{% if active_plans %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>Active Rotation Plans ({{ active_plans_count }})</h2>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Plan Name</th>
+                    <th>Field</th>
+                    <th>Timeline</th>
+                    <th>Goal</th>
+                    <th>Confidence</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for plan in active_plans %}
+                <tr>
+                    <td>
+                        <strong>{{ plan.name }}</strong>
+                        {% if plan.ai_generated %}
+                        <span class="badge badge-info">AI</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ plan.field.name }}</td>
+                    <td>{{ plan.start_year }} - {{ plan.get_end_year }} ({{ plan.duration_years }}y)</td>
+                    <td><span class="badge">{{ plan.get_primary_goal_display }}</span></td>
+                    <td>
+                        {% if plan.ai_generated %}
+                        <div class="progress-bar" style="width: 100px;">
+                            <div class="progress-fill" style="width: {{ plan.confidence_score }}%; 
+                                background: linear-gradient(90deg, 
+                                {% if plan.confidence_score >= 80 %}#2ecc71{% elif plan.confidence_score >= 60 %}#f39c12{% else %}#e74c3c{% endif %}, 
+                                {% if plan.confidence_score >= 80 %}#27ae60{% elif plan.confidence_score >= 60 %}#e67e22{% else %}#c0392b{% endif %});">
+                                {{ plan.confidence_score }}%
+                            </div>
+                        </div>
+                        {% else %}
+                        Manual
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'rotation:plan_detail' plan.pk %}" class="btn btn-sm">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Current Year Activities -->
+{% if current_sequences %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>This Year's Planned Crops</h2>
+    </div>
+    <div class="card-body">
+        <div class="grid-3">
+            {% for seq in current_sequences %}
+            <div class="card">
+                <div class="card-body">
+                    <h3 style="margin-top: 0;">{{ seq.crop_name }}</h3>
+                    {% if seq.variety %}<p><em>{{ seq.variety }}</em></p>{% endif %}
+                    <p><strong>Field:</strong> {{ seq.rotation_plan.field.name }}</p>
+                    <p><strong>Plant:</strong> Month {{ seq.expected_planting_month }}</p>
+                    <p><strong>Harvest:</strong> Month {{ seq.expected_harvest_month }}</p>
+                    {% if seq.expected_yield_kg_per_acre %}
+                    <p><strong>Expected Yield:</strong> {{ seq.expected_yield_kg_per_acre|floatformat:0 }} kg/acre</p>
+                    {% endif %}
+                    <p>
+                        <span class="badge {% if seq.nitrogen_requirement == 'nitrogen_fixing' %}badge-success{% elif seq.nitrogen_requirement == 'high' %}badge-warning{% else %}badge-info{% endif %}">
+                            {{ seq.get_nitrogen_requirement_display }}
+                        </span>
+                    </p>
+                    {% if not seq.is_completed %}
+                    <a href="{% url 'rotation:sequence_complete' seq.pk %}" class="btn btn-sm btn-success">Mark Complete</a>
+                    {% else %}
+                    <span class="badge badge-success">✓ Completed</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Plans -->
+{% if recent_plans %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>Recently Created Plans</h2>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Plan Name</th>
+                    <th>Field</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for plan in recent_plans %}
+                <tr>
+                    <td>
+                        {{ plan.name }}
+                        {% if plan.ai_generated %}<span class="badge badge-info">AI</span>{% endif %}
+                    </td>
+                    <td>{{ plan.field.name }}</td>
+                    <td>{{ plan.duration_years }} years</td>
+                    <td>
+                        <span class="badge {% if plan.status == 'active' %}badge-success{% elif plan.status == 'draft' %}badge-warning{% else %}badge-secondary{% endif %}">
+                            {{ plan.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ plan.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'rotation:plan_detail' plan.pk %}" class="btn btn-sm">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Fields Without Rotation -->
+{% if fields_without_rotation %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>⚠️ Fields Without Active Rotation Plans</h2>
+    </div>
+    <div class="card-body">
+        <p>The following fields don't have active rotation plans. Consider creating one!</p>
+        <div class="grid-4">
+            {% for field in fields_without_rotation %}
+            <div class="card">
+                <div class="card-body">
+                    <h3 style="margin-top: 0;">{{ field.name }}</h3>
+                    <p>{{ field.size_acres }} acres</p>
+                    <p>{{ field.get_soil_type_display }}</p>
+                    <a href="{% url 'rotation:generate' %}?field={{ field.pk }}" class="btn btn-sm btn-primary">Generate Plan</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Empty State -->
+{% if total_plans == 0 %}
+<div class="empty-state" style="margin-top: 3rem;">
+    <div class="empty-icon">🌾</div>
+    <h2>No Rotation Plans Yet</h2>
+    <p>Start planning your crop rotations to optimize yields and soil health!</p>
+    <a href="{% url 'rotation:generate' %}" class="btn btn-primary btn-lg">
+        🤖 Generate Your First AI Rotation Plan
+    </a>
+    <a href="{% url 'rotation:plan_create' %}" class="btn btn-lg">
+        ➕ Create Manual Plan
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}

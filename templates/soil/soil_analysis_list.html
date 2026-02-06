@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Soil Analysis - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}🌍{% endblock %}
+{% block page_title %}Soil Analysis{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ Soil Analysis</span>
+{% endblock %}
+
+{% block header_actions %}
+    <a href="{% url 'soil_analysis_create' %}" class="btn btn-primary">
+        <span>➕</span>
+        <span>Add Analysis</span>
+    </a>
+{% endblock %}
+
+{% block content %}
+    <!-- Stats -->
+    <div class="grid grid-3 mb-2">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #8b6f47 0%, #3d2817 100%);">🌍</div>
+            <div class="stat-content">
+                <h3>{{ total_analyses }}</h3>
+                <p>Total Analyses</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #6faa3e 0%, #4a7c2c 100%);">🔬</div>
+            <div class="stat-content">
+                <h3>{{ fields.count }}</h3>
+                <p>Fields Analyzed</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f4c430 0%, #8b6f47 100%);">📋</div>
+            <div class="stat-content">
+                <h3>Active</h3>
+                <p>Analysis Program</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filter Section -->
+    {% if fields %}
+        <div class="card mb-2">
+            <div class="card-body">
+                <form method="get" class="d-flex gap-2 align-center">
+                    <label for="field-filter" style="font-weight: 600; color: var(--primary-green);">Filter by Field:</label>
+                    <select name="field" id="field-filter" class="form-control form-select" style="max-width: 300px;" onchange="this.form.submit()">
+                        <option value="">All Fields</option>
+                        {% for field in fields %}
+                            <option value="{{ field.pk }}" {% if selected_field == field.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ field.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Soil Analyses Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">All Soil Analyses</h3>
+        </div>
+        <div class="card-body">
+            {% if soil_analyses %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Analysis Date</th>
+                            <th>pH Level</th>
+                            <th>Organic Matter</th>
+                            <th>N-P-K (ppm)</th>
+                            <th>Lab</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for analysis in soil_analyses %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'field_detail' analysis.field.pk %}" style="color: var(--primary-green); font-weight: 600;">
+                                        {{ analysis.field.name }}
+                                    </a>
+                                </td>
+                                <td>{{ analysis.analysis_date|date:"M d, Y" }}</td>
+                                <td>
+                                    <span class="badge badge-info">{{ analysis.ph_level }} - {{ analysis.get_ph_status }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-success">{{ analysis.organic_matter }}%</span>
+                                </td>
+                                <td style="font-size: 0.85rem;">
+                                    {{ analysis.nitrogen_ppm|floatformat:1 }} - 
+                                    {{ analysis.phosphorus_ppm|floatformat:1 }} - 
+                                    {{ analysis.potassium_ppm|floatformat:1 }}
+                                </td>
+                                <td>{{ analysis.lab_name|default:"-" }}</td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a href="{% url 'soil_analysis_detail' analysis.pk %}" class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">
+                                            View
+                                        </a>
+                                        <a href="{% url 'soil_analysis_update' analysis.pk %}" class="btn btn-warning" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">
+                                            Edit
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="text-center p-3">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🌍</div>
+                    <h4>No Soil Analyses Yet</h4>
+                    <p class="muted-text">Start analyzing your soil to get personalized nutrient recommendations.</p>
+                    <a href="{% url 'soil_analysis_create' %}" class="btn btn-primary mt-1">
+                        <span>➕</span>
+                        <span>Add First Analysis</span>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

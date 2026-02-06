@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Crop Calendar{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>📅 Crop Calendar</h1>
+            <p>Schedule and manage agricultural activities</p>
+        </div>
+        <a href="{% url 'calendar_create' %}" class="btn btn-primary">➕ Schedule Activity</a>
+    </div>
+</div>
+
+<!-- Upcoming Activities -->
+{% if upcoming_activities %}
+<div class="card">
+    <div class="card-header">
+        <h2>🔜 Upcoming Activities</h2>
+    </div>
+    <div class="card-body">
+        <div class="grid-3">
+            {% for activity in upcoming_activities %}
+            <div class="card">
+                <div class="card-body">
+                    <h3 style="margin-top: 0;">{{ activity.get_activity_type_display }}</h3>
+                    <p><strong>Crop:</strong> {{ activity.crop_name }}</p>
+                    <p><strong>Field:</strong> {{ activity.field.name }}</p>
+                    <p><strong>Date:</strong> {{ activity.scheduled_date }}</p>
+                    <p><span class="badge badge-warning">{{ activity.get_status_display }}</span></p>
+                    <a href="{% url 'calendar_detail' activity.pk %}" class="btn btn-sm">View Details</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Overdue Activities -->
+{% if overdue_activities %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>⚠️ Overdue Activities</h2>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Activity</th>
+                    <th>Crop</th>
+                    <th>Field</th>
+                    <th>Scheduled Date</th>
+                    <th>Days Overdue</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for activity in overdue_activities %}
+                <tr>
+                    <td>{{ activity.get_activity_type_display }}</td>
+                    <td>{{ activity.crop_name }}</td>
+                    <td>{{ activity.field.name }}</td>
+                    <td>{{ activity.scheduled_date }}</td>
+                    <td><span class="badge badge-danger">{% if activity.days_until < 0 %}{{ activity.days_until|add:"0"|cut:"-" }}{% else %}{{ activity.days_until }}{% endif %} days</span></td>
+                    <td>
+                        <a href="{% url 'calendar_detail' activity.pk %}" class="btn btn-sm">View</a>
+                        <a href="{% url 'mark_complete' activity.pk %}" class="btn btn-sm btn-success">Complete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Completed Activities -->
+{% if completed_activities %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>✅ Recently Completed</h2>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Activity</th>
+                    <th>Crop</th>
+                    <th>Field</th>
+                    <th>Completed Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for activity in completed_activities %}
+                <tr>
+                    <td>{{ activity.get_activity_type_display }}</td>
+                    <td>{{ activity.crop_name }}</td>
+                    <td>{{ activity.field.name }}</td>
+                    <td>{{ activity.scheduled_date }}</td>
+                    <td>
+                        <a href="{% url 'calendar_detail' activity.pk %}" class="btn btn-sm">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Empty State -->
+{% if not upcoming_activities and not overdue_activities and not completed_activities %}
+<div class="empty-state">
+    <div class="empty-icon">📅</div>
+    <h2>No Activities Scheduled</h2>
+    <p>Start planning your agricultural activities.</p>
+    <a href="{% url 'calendar_create' %}" class="btn btn-primary btn-lg">➕ Schedule First Activity</a>
+</div>
+{% endif %}
+
+{% endblock %}

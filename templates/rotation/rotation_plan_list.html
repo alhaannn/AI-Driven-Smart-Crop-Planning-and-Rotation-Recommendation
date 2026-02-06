@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}Rotation Plans{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>🔄 Rotation Plans</h1>
+            <p>Manage all crop rotation plans across your fields</p>
+        </div>
+        <div>
+            <a href="{% url 'rotation:generate' %}" class="btn btn-primary">🤖 Generate AI Plan</a>
+            <a href="{% url 'rotation:plan_create' %}" class="btn btn-success">➕ Create Manual Plan</a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.total_plans }}</div>
+            <div class="stat-label">Total Plans</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.active_plans }}</div>
+            <div class="stat-label">Active Plans</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">🤖</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.ai_generated }}</div>
+            <div class="stat-label">AI Generated</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.avg_confidence|floatformat:0 }}%</div>
+            <div class="stat-label">Avg AI Confidence</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-body">
+        <form method="get" class="filter-form">
+            <div class="grid-4">
+                <div class="form-group">
+                    <label for="field">Field</label>
+                    <select name="field" id="field" class="form-control">
+                        <option value="">All Fields</option>
+                        {% for field in fields %}
+                        <option value="{{ field.pk }}" {% if selected_field == field.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ field.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="">All Statuses</option>
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="primary_goal">Primary Goal</label>
+                    <select name="primary_goal" id="primary_goal" class="form-control">
+                        <option value="">All Goals</option>
+                        {% for value, label in goal_choices %}
+                        <option value="{{ value }}" {% if selected_goal == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Filter</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Plans Table -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-body">
+        {% if plans %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Plan Name</th>
+                    <th>Field</th>
+                    <th>Timeline</th>
+                    <th>Status</th>
+                    <th>Goal</th>
+                    <th>Type</th>
+                    <th>Sequences</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for plan in plans %}
+                <tr>
+                    <td>
+                        <strong>{{ plan.name }}</strong>
+                    </td>
+                    <td>{{ plan.field.name }}</td>
+                    <td>{{ plan.start_year }} - {{ plan.get_end_year }} ({{ plan.duration_years }}y)</td>
+                    <td>
+                        <span class="badge {% if plan.status == 'active' %}badge-success{% elif plan.status == 'draft' %}badge-warning{% else %}badge-secondary{% endif %}">
+                            {{ plan.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ plan.get_primary_goal_display }}</td>
+                    <td>
+                        {% if plan.ai_generated %}
+                        <span class="badge badge-info">🤖 AI ({{ plan.confidence_score }}%)</span>
+                        {% else %}
+                        <span class="badge">Manual</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ plan.get_total_sequences }}</td>
+                    <td>
+                        <a href="{% url 'rotation:plan_detail' plan.pk %}" class="btn btn-sm">View</a>
+                        <a href="{% url 'rotation:plan_update' plan.pk %}" class="btn btn-sm">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🌾</div>
+            <h2>No Rotation Plans Found</h2>
+            <p>Start by generating an AI-powered rotation plan or creating one manually.</p>
+            <a href="{% url 'rotation:generate' %}" class="btn btn-primary">🤖 Generate AI Plan</a>
+            <a href="{% url 'rotation:plan_create' %}" class="btn">➕ Create Manual Plan</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.filter-form {
+    margin: 0;
+}
+</style>
+
+{% endblock %}

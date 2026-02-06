@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}🌾{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ <a href="{% url 'field_list' %}">Fields</a></span>
+    <span>/ {{ title }}</span>
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-2">
+        <!-- Form Card -->
+        <div class="card" style="grid-column: 1 / -1; max-width: 800px; margin: 0 auto; width: 100%;">
+            <div class="card-header">
+                <h3 class="card-title">{{ title }}</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" class="auto-save-form" id="field-form">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="grid grid-2 gap-2">
+                        <!-- Field Name -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label" for="{{ form.name.id_for_label }}">
+                                {{ form.name.label }}
+                                <span style="color: #e74c3c;">*</span>
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                    {{ form.name.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="muted-text">{{ form.name.help_text }}</small>
+                        </div>
+                        
+                        <!-- Location -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label" for="{{ form.location.id_for_label }}">
+                                {{ form.location.label }}
+                                <span style="color: #e74c3c;">*</span>
+                            </label>
+                            {{ form.location }}
+                            {% if form.location.errors %}
+                                <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                    {{ form.location.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="muted-text">{{ form.location.help_text }}</small>
+                        </div>
+                        
+                        <!-- Size -->
+                        <div class="form-group">
+                            <label class="form-label" for="{{ form.size_acres.id_for_label }}">
+                                {{ form.size_acres.label }}
+                                <span style="color: #e74c3c;">*</span>
+                            </label>
+                            {{ form.size_acres }}
+                            {% if form.size_acres.errors %}
+                                <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                    {{ form.size_acres.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="muted-text">{{ form.size_acres.help_text }}</small>
+                        </div>
+                        
+                        <!-- Soil Type -->
+                        <div class="form-group">
+                            <label class="form-label" for="{{ form.soil_type.id_for_label }}">
+                                {{ form.soil_type.label }}
+                                <span style="color: #e74c3c;">*</span>
+                            </label>
+                            {{ form.soil_type }}
+                            {% if form.soil_type.errors %}
+                                <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                    {{ form.soil_type.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="muted-text">{{ form.soil_type.help_text }}</small>
+                        </div>
+                        
+                        <!-- Irrigation Type -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label" for="{{ form.irrigation_type.id_for_label }}">
+                                {{ form.irrigation_type.label }}
+                                <span style="color: #e74c3c;">*</span>
+                            </label>
+                            {{ form.irrigation_type }}
+                            {% if form.irrigation_type.errors %}
+                                <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                    {{ form.irrigation_type.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="muted-text">{{ form.irrigation_type.help_text }}</small>
+                        </div>
+                        
+                        <!-- Notes -->
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label" for="{{ form.notes.id_for_label }}">
+                                {{ form.notes.label }}
+                            </label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                    {{ form.notes.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="muted-text">{{ form.notes.help_text }}</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-between align-center" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid var(--medium-gray);">
+                        <a href="{% url 'field_list' %}" class="btn btn-secondary">
+                            <span>←</span>
+                            <span>Cancel</span>
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <span>💾</span>
+                            <span>{{ button_text }}</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

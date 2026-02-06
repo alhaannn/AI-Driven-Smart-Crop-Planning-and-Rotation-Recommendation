@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}All Rotation Benefits{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>🎯 Rotation Benefits</h1>
+    <p>Track expected and verified benefits across all rotation plans</p>
+</div>
+
+<!-- Statistics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.total_benefits }}</div>
+            <div class="stat-label">Total Benefits</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.verified_benefits }}</div>
+            <div class="stat-label">Verified</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">📈</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.avg_expected_improvement|floatformat:1 }}%</div>
+            <div class="stat-label">Avg Expected</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ stats.avg_actual_improvement|floatformat:1 }}%</div>
+            <div class="stat-label">Avg Actual</div>
+        </div>
+    </div>
+</div>
+
+<!-- Benefits List -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-body">
+        {% if benefits %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Rotation Plan</th>
+                    <th>Benefit Type</th>
+                    <th>Expected</th>
+                    <th>Actual</th>
+                    <th>Year</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for benefit in benefits %}
+                <tr>
+                    <td>{{ benefit.rotation_plan.name }}</td>
+                    <td>{{ benefit.get_benefit_type_display }}</td>
+                    <td>
+                        {% if benefit.expected_improvement_percent %}
+                        +{{ benefit.expected_improvement_percent|floatformat:1 }}%
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if benefit.actual_improvement_percent %}
+                        +{{ benefit.actual_improvement_percent|floatformat:1 }}%
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </td>
+                    <td>Year {{ benefit.expected_to_manifest_year }}</td>
+                    <td>{{ benefit.priority }}/10</td>
+                    <td>
+                        {% if benefit.is_verified %}
+                        <span class="badge badge-success">✓ Verified</span>
+                        {% else %}
+                        <span class="badge badge-warning">Not Verified</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'rotation:benefit_update' benefit.pk %}" class="btn btn-sm">Edit</a>
+                        <a href="{% url 'rotation:plan_detail' benefit.rotation_plan.pk %}" class="btn btn-sm">View Plan</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🎯</div>
+            <h2>No Benefits Tracked</h2>
+            <p>Benefits will appear here as rotation plans are created.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

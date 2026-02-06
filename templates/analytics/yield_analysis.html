@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Yield Analysis{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>🌾 Yield Analysis & Forecasting</h1>
+            <p>Historical trends and future predictions</p>
+        </div>
+        <a href="{% url 'analytics:forecast_create' %}" class="btn btn-primary">🔮 Create Forecast</a>
+    </div>
+</div>
+
+<!-- Field Yield Comparison -->
+<div class="card">
+    <div class="card-header">
+        <h2>Field Yield Performance</h2>
+    </div>
+    <div class="card-body">
+        {% if field_yield_data %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Average Yield</th>
+                    <th>Latest Yield</th>
+                    <th>Harvests</th>
+                    <th>Trend</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in field_yield_data %}
+                <tr>
+                    <td>{{ data.field.name }}</td>
+                    <td>{{ data.avg_yield }} kg/acre</td>
+                    <td>{{ data.latest_yield }} kg/acre</td>
+                    <td>{{ data.harvest_count }}</td>
+                    <td>
+                        {% if data.trend == 'up' %}
+                        <span class="badge badge-success">📈 Improving</span>
+                        {% else %}
+                        <span class="badge badge-warning">📉 Declining</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No yield data available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Active Forecasts -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>🔮 Active Forecasts</h2>
+    </div>
+    <div class="card-body">
+        {% if forecasts %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Crop</th>
+                    <th>Year</th>
+                    <th>Season</th>
+                    <th>Predicted Yield</th>
+                    <th>Confidence</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for forecast in forecasts %}
+                <tr>
+                    <td>{{ forecast.field.name }}</td>
+                    <td>{{ forecast.crop_name }}</td>
+                    <td>{{ forecast.forecast_year }}</td>
+                    <td>{{ forecast.get_planting_season_display }}</td>
+                    <td>{{ forecast.predicted_yield_kg|floatformat:0 }} kg</td>
+                    <td>{{ forecast.confidence_level }}%</td>
+                    <td>
+                        <a href="{% url 'analytics:forecast_update' forecast.pk %}" class="btn btn-sm">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No active forecasts. <a href="{% url 'analytics:forecast_create' %}">Create one</a></p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Completed Forecasts (Accuracy) -->
+{% if completed_forecasts %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>✅ Forecast Accuracy</h2>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Crop</th>
+                    <th>Year</th>
+                    <th>Predicted</th>
+                    <th>Actual</th>
+                    <th>Variance</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for forecast in completed_forecasts %}
+                <tr>
+                    <td>{{ forecast.field.name }}</td>
+                    <td>{{ forecast.crop_name }}</td>
+                    <td>{{ forecast.forecast_year }}</td>
+                    <td>{{ forecast.predicted_yield_kg|floatformat:0 }} kg</td>
+                    <td>{{ forecast.actual_yield_kg|floatformat:0 }} kg</td>
+                    <td>{{ forecast.variance_percent|floatformat:1 }}%</td>
+                    <td><span class="badge">{{ forecast.get_accuracy_status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

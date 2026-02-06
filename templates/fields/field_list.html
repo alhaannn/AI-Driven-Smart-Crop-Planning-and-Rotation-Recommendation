@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fields - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}🌾{% endblock %}
+{% block page_title %}Fields{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ Fields</span>
+{% endblock %}
+
+{% block header_actions %}
+    <a href="{% url 'field_create' %}" class="btn btn-primary">
+        <span>➕</span>
+        <span>Add New Field</span>
+    </a>
+{% endblock %}
+
+{% block content %}
+    <!-- Summary Stats -->
+    <div class="grid grid-3 mb-2">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #6faa3e 0%, #4a7c2c 100%);">🌾</div>
+            <div class="stat-content">
+                <h3>{{ total_fields }}</h3>
+                <p>Total Fields</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #8b6f47 0%, #3d2817 100%);">📏</div>
+            <div class="stat-content">
+                <h3>{{ total_acres|floatformat:2 }}</h3>
+                <p>Total Acres</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #87ceeb 0%, #4a7c2c 100%);">💧</div>
+            <div class="stat-content">
+                <h3>{{ fields.count }}</h3>
+                <p>Active Fields</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Fields Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">All Fields</h3>
+        </div>
+        <div class="card-body">
+            {% if fields %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Field Name</th>
+                            <th>Location</th>
+                            <th>Size (acres)</th>
+                            <th>Soil Type</th>
+                            <th>Irrigation</th>
+                            <th>Crop Records</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for field in fields %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'field_detail' field.pk %}" style="font-weight: 600; color: var(--primary-green);">
+                                        {{ field.name }}
+                                    </a>
+                                </td>
+                                <td>{{ field.location }}</td>
+                                <td>{{ field.size_acres }}</td>
+                                <td><span class="badge badge-info">{{ field.get_soil_type_display }}</span></td>
+                                <td>{{ field.get_irrigation_type_display }}</td>
+                                <td>
+                                    <span class="badge badge-success">{{ field.crop_count }} record{{ field.crop_count|pluralize }}</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a href="{% url 'field_detail' field.pk %}" class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">
+                                            View
+                                        </a>
+                                        <a href="{% url 'field_update' field.pk %}" class="btn btn-warning" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">
+                                            Edit
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="text-center p-3">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🌾</div>
+                    <h4>No Fields Yet</h4>
+                    <p class="muted-text">Get started by adding your first field to the system.</p>
+                    <a href="{% url 'field_create' %}" class="btn btn-primary mt-1">
+                        <span>➕</span>
+                        <span>Add First Field</span>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

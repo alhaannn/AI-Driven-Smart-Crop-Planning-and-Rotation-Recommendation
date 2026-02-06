@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Sequence{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>⚠️ Delete Crop Sequence</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <strong>Warning:</strong> You are about to delete this crop sequence. This action cannot be undone!
+        </div>
+        
+        <h3>Year {{ sequence.year_in_rotation }}: {{ sequence.crop_name }}</h3>
+        {% if sequence.variety %}<p><strong>Variety:</strong> {{ sequence.variety }}</p>{% endif %}
+        <p><strong>Rotation Plan:</strong> {{ sequence.rotation_plan.name }}</p>
+        <p><strong>Planting Season:</strong> {{ sequence.get_planting_season_display }}</p>
+        
+        <form method="post" style="margin-top: 2rem;">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">Yes, Delete This Sequence</button>
+                <a href="{% url 'rotation:plan_detail' sequence.rotation_plan.pk %}" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

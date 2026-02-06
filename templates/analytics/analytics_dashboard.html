@@ -1,0 +1,450 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📊 Analytics & Insights Dashboard</h1>
+    <p>Comprehensive farm performance analytics and data-driven insights</p>
+</div>
+
+<!-- Quick Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">🌾</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ total_fields }}</div>
+            <div class="stat-label">Total Fields</div>
+            <div class="stat-sublabel">{{ total_area|floatformat:1 }} acres</div>
+        </div>
+    </div>
+    
+    <div class="stat-card {%if financial_summary.net_profit >= 0 %}stat-positive{% else %}stat-negative{% endif %}">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+            <div class="stat-value">${{ financial_summary.net_profit|floatformat:0 }}</div>
+            <div class="stat-label">Net Profit (12mo)</div>
+            <div class="stat-sublabel">{{ financial_summary.profit_margin|floatformat:1 }}% margin</div>
+        </div>
+    </div>
+    
+    <div class="stat-card stat-income">
+        <div class="stat-icon">📈</div>
+        <div class="stat-content">
+            <div class="stat-value">${{ financial_summary.total_income|floatformat:0 }}</div>
+            <div class="stat-label">Total Income</div>
+            <div class="stat-sublabel">Last 12 months</div>
+        </div>
+    </div>
+    
+    <div class="stat-card stat-expense">
+        <div class="stat-icon">📉</div>
+        <div class="stat-content">
+            <div class="stat-value">${{ financial_summary.total_expenses|floatformat:0 }}</div>
+            <div class="stat-label">Total Expenses</div>
+            <div class="stat-sublabel">Last 12 months</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>Quick Actions</h2>
+    </div>
+    <div class="card-body">
+        <div class="grid-4">
+            <a href="{% url 'analytics:financial_overview' %}" class="btn btn-primary">💰 Financial Overview</a>
+            <a href="{% url 'analytics:yield_analysis' %}" class="btn btn-success">🌾 Yield Analysis</a>
+            <a href="{% url 'analytics:performance_metrics' %}" class="btn">📊 Performance Metrics</a>
+            <a href="{% url 'analytics:insights' %}" class="btn">💡 AI Insights</a>
+        </div>
+    </div>
+</div>
+
+<!-- Financial Trend Chart -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>📈 Financial Trend (Last 12 Months)</h2>
+    </div>
+    <div class="card-body">
+        <canvas id="financialTrendChart" height="80"></canvas>
+    </div>
+</div>
+
+<!-- Two Column Layout -->
+<div class="grid-2" style="margin-top: 2rem; gap: 2rem;">
+    <!-- Recent Harvests -->
+    <div class="card">
+        <div class="card-header">
+            <h2>🌾 Recent Harvests</h2>
+        </div>
+        <div class="card-body">
+            {% if recent_harvests %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Crop</th>
+                        <th>Field</th>
+                        <th>Yield/Acre</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for harvest in recent_harvests %}
+                    <tr>
+                        <td>{{ harvest.crop_name }}</td>
+                        <td>{{ harvest.field.name }}</td>
+                        <td>{{ harvest.yield_kg_per_acre|floatformat:0 }} kg</td>
+                        <td>{{ harvest.harvest_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No recent harvests recorded.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Active Forecasts -->
+    <div class="card">
+        <div class="card-header">
+            <h2>🔮 Active Yield Forecasts</h2>
+        </div>
+        <div class="card-body">
+            {% if active_forecasts %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Crop</th>
+                        <th>Field</th>
+                        <th>Year</th>
+                        <th>Predicted Yield</th>
+                        <th>Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for forecast in active_forecasts %}
+                    <tr>
+                        <td>{{ forecast.crop_name }}</td>
+                        <td>{{ forecast.field.name }}</td>
+                        <td>{{ forecast.forecast_year }}</td>
+                        <td>{{ forecast.predicted_yield_kg|floatformat:0 }} kg</td>
+                        <td>
+                            <div class="progress-bar" style="width: 80px;">
+                                <div class="progress-fill" style="width: {{ forecast.confidence_level }}%; background: #3498db;">
+                                    {{ forecast.confidence_level }}%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No active forecasts. <a href="{% url 'analytics:forecast_create' %}">Create one</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Insights & Alerts -->
+{% if insights %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>💡 AI-Powered Insights & Recommendations</h2>
+            <a href="{% url 'analytics:insights' %}" class="btn btn-sm">View All</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="insights-grid">
+            {% for insight in insights %}
+            <div class="insight-card insight-{{ insight.type }} priority-{{ insight.priority }}">
+                <div class="insight-header">
+                    <span class="insight-icon">
+                        {% if insight.type == 'warning' %}⚠️
+                        {% elif insight.type == 'alert' %}🚨
+                        {% else %}💡{% endif %}
+                    </span>
+                    <span class="insight-category">{{ insight.category|title }}</span>
+                </div>
+                <div class="insight-message">
+                    <strong>{% if insight.field %}{{ insight.field.name }}:{% endif %}</strong> 
+                    {{ insight.message }}
+                </div>
+                <div class="insight-footer">
+                    <span class="badge badge-{{ insight.priority }}">{{ insight.priority|upper }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Latest Performance Metrics -->
+{% if latest_metrics %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>📊 Latest Performance Metrics</h2>
+            <a href="{% url 'analytics:performance_metrics' %}" class="btn btn-sm">View Details</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="metrics-grid">
+            {% for metric in latest_metrics %}
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-field">{{ metric.field.name }}</span>
+                    <span class="metric-type">{{ metric.get_metric_type_display }}</span>
+                </div>
+                <div class="metric-score" style="color: {{ metric.get_trend_color }};">
+                    {{ metric.score|floatformat:1 }}%
+                </div>
+                <div class="metric-level">{{ metric.get_performance_level }}</div>
+                <div class="metric-date">{{ metric.measurement_date }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.stat-card.stat-positive {
+    background: linear-gradient(135deg, #d4edda 0%, #ffffff 100%);
+    border-color: #28a745;
+}
+
+.stat-card.stat-negative {
+    background: linear-gradient(135deg, #f8d7da 0%, #ffffff 100%);
+    border-color: #dc3545;
+}
+
+.stat-card.stat-income {
+    background: linear-gradient(135deg, #d1ecf1 0%, #ffffff 100%);
+}
+
+.stat-card.stat-expense {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);
+}
+
+.stat-sublabel {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.insight-card {
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid;
+    background: white;
+}
+
+.insight-card.insight-warning {
+    border-left-color: #ff9800;;
+    background: #fff3e0;
+}
+
+.insight-card.insight-alert {
+    border-left-color: #f44336;
+    background: #ffebee;
+}
+
+.insight-card.insight-info {
+    border-left-color: #2196f3;
+    background: #e3f2fd;
+}
+
+.insight-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.insight-icon {
+    font-size: 1.25rem;
+}
+
+.insight-category {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #666;
+}
+
+.insight-message {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+.insight-footer {
+    margin-top: 0.5rem;
+}
+
+.badge-high {
+    background: #f44336;
+    color: white;
+}
+
+.badge-medium {
+    background: #ff9800;
+    color: white;
+}
+
+.badge-low {
+    background: #4caf50;
+    color: white;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.metric-card {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.metric-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.metric-field {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.metric-type {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.metric-score {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.metric-level {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.metric-date {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+.progress-bar {
+    height: 20px;
+    background: #ecf0f1;
+    border-radius: 10px;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.progress-fill {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.75rem;
+}
+</style>
+
+<!-- Chart.js for Financial Trend -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('financialTrendChart').getContext('2d');
+    
+ const monthlyData = {{ monthly_data|safe }};
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: monthlyData.map(d => d.month),
+            datasets: [
+                {
+                    label: 'Income',
+                    data: monthlyData.map(d => d.income),
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Expenses',
+                    data: monthlyData.map(d => d.expenses),
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Profit',
+                    data: monthlyData.map(d => d.profit),
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': $' + context.parsed.y.toFixed(0);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toFixed(0);
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete {{ field.name }} - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}🗑️{% endblock %}
+{% block page_title %}Delete Field{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ <a href="{% url 'field_list' %}">Fields</a></span>
+    <span>/ <a href="{% url 'field_detail' field.pk %}">{{ field.name }}</a></span>
+    <span>/ Delete</span>
+{% endblock %}
+
+{% block content %}
+    <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-header">
+            <h3 class="card-title" style="color: #e74c3c;">⚠️ Confirm Deletion</h3>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger">
+                <strong>Warning:</strong> This action cannot be undone!
+            </div>
+            
+            <p>Are you sure you want to delete the field <strong>"{{ field.name }}"</strong>?</p>
+            
+            <div style="background: var(--light-gray); padding: 1rem; border-radius: var(--radius-md); margin: 1.5rem 0;">
+                <h4 style="margin-bottom: 0.5rem;">Field Details:</h4>
+                <ul style="margin: 0; padding-left: 1.5rem;">
+                    <li>Size: {{ field.size_acres }} acres</li>
+                    <li>Location: {{ field.location }}</li>
+                    <li>Crop Records: {{ field.get_total_crop_history_count }}</li>
+                </ul>
+            </div>
+            
+            {% if field.get_total_crop_history_count > 0 %}
+                <div class="alert alert-warning">
+                    <strong>Note:</strong> This field has {{ field.get_total_crop_history_count }} crop history record{{ field.get_total_crop_history_count|pluralize }}. 
+                    Deleting this field will also delete all associated crop history records.
+                </div>
+            {% endif %}
+            
+            <form method="post" style="margin-top: 2rem;">
+                {% csrf_token %}
+                <div class="d-flex justify-between">
+                    <a href="{% url 'field_detail' field.pk %}" class="btn btn-secondary">
+                        <span>←</span>
+                        <span>Cancel</span>
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <span>🗑️</span>
+                        <span>Delete Field</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

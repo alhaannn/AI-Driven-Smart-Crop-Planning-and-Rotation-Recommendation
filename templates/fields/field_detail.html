@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ field.name }} - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}🌾{% endblock %}
+{% block page_title %}{{ field.name }}{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ <a href="{% url 'field_list' %}">Fields</a></span>
+    <span>/ {{ field.name }}</span>
+{% endblock %}
+
+{% block header_actions %}
+    <div class="d-flex gap-1">
+        <a href="{% url 'crop_history_create' %}?field={{ field.pk }}" class="btn btn-success">
+            <span>➕</span>
+            <span>Add Crop History</span>
+        </a>
+        <a href="{% url 'reports:export_field_pdf' field.pk %}" class="btn btn-primary" target="_blank">
+            <span>📄</span>
+            <span>Export PDF</span>
+        </a>
+        <a href="{% url 'field_update' field.pk %}" class="btn btn-warning">
+            <span>✏️</span>
+            <span>Edit Field</span>
+        </a>
+        <a href="{% url 'field_delete' field.pk %}" class="btn btn-danger">
+            <span>🗑️</span>
+            <span>Delete</span>
+        </a>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <!-- Field Information Card -->
+    <div class="grid grid-2 mb-2">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Field Information</h3>
+            </div>
+            <div class="card-body">
+                <table style="width: 100%;">
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Field Name</td>
+                        <td style="padding: 0.75rem;">{{ field.name }}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Location</td>
+                        <td style="padding: 0.75rem;">{{ field.location }}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Size</td>
+                        <td style="padding: 0.75rem;">{{ field.size_acres }} acres</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Soil Type</td>
+                        <td style="padding: 0.75rem;"><span class="badge badge-info">{{ field.get_soil_type_display }}</span></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Irrigation</td>
+                        <td style="padding: 0.75rem;"><span class="badge badge-success">{{ field.get_irrigation_type_display }}</span></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Created</td>
+                        <td style="padding: 0.75rem;">{{ field.created_at|date:"F d, Y" }}</td>
+                    </tr>
+                </table>
+                
+                {% if field.notes %}
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: var(--light-gray); border-radius: var(--radius-md);">
+                        <h4 style="margin-bottom: 0.5rem; color: var(--primary-green);">Notes</h4>
+                        <p style="margin: 0; color: var(--text-secondary);">{{ field.notes }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Statistics Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Statistics</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-2 gap-2">
+                    <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #a8d08d 0%, #6faa3e 100%); border-radius: var(--radius-lg); color: white;">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🌾</div>
+                        <h3 style="color: white; margin: 0;">{{ stats.total_crops }}</h3>
+                        <p style="color: rgba(255,255,255,0.9); margin: 0;">Total Crops Grown</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #6faa3e 0%, #4a7c2c 100%); border-radius: var(--radius-lg); color: white;">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📊</div>
+                        <h3 style="color: white; margin: 0;">{{ stats.avg_yield|floatformat:2 }}</h3>
+                        <p style="color: rgba(255,255,255,0.9); margin: 0;">Avg Yield (kg/acre)</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #4a7c2c 0%, #2d5016 100%); border-radius: var(--radius-lg); color: white; grid-column: 1 / -1;">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🌱</div>
+                        <h3 style="color: white; margin: 0;">{{ stats.latest_crop|default:"None" }}</h3>
+                        <p style="color: rgba(255,255,255,0.9); margin: 0;">Latest Crop</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Crop History -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Recent Crop History</h3>
+            <a href="{% url 'crop_history_list' %}?field={{ field.pk }}" class="btn btn-secondary">View All</a>
+        </div>
+        <div class="card-body">
+            {% if crop_histories %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Crop</th>
+                            <th>Variety</th>
+                            <th>Planting Date</th>
+                            <th>Harvest Date</th>
+                            <th>Yield (kg/acre)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for history in crop_histories %}
+                            <tr>
+                                <td style="font-weight: 600;">{{ history.crop_name }}</td>
+                                <td>{{ history.variety|default:"-" }}</td>
+                                <td>{{ history.planting_date|date:"M d, Y" }}</td>
+                                <td>{{ history.harvest_date|date:"M d, Y" }}</td>
+                                <td><span class="badge badge-success">{{ history.yield_amount }}</span></td>
+                                <td>
+                                    <a href="{% url 'crop_history_detail' history.pk %}" class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="text-center p-3">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+                    <h4>No Crop History</h4>
+                    <p class="muted-text">No crops have been grown in this field yet.</p>
+                    <a href="{% url 'crop_history_create' %}?field={{ field.pk }}" class="btn btn-primary mt-1">
+                        <span>➕</span>
+                        <span>Add First Crop Record</span>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

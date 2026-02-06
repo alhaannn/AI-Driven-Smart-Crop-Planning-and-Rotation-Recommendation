@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Calendar Activity{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>⚠️ Delete Calendar Activity</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <strong>Warning:</strong> You are about to delete this calendar activity. This action cannot be undone!
+        </div>
+        
+        <h3>{{ activity.get_activity_type_display }}</h3>
+        <p><strong>Crop:</strong> {{ activity.crop_name }}</p>
+        <p><strong>Field:</strong> {{ activity.field.name }}</p>
+        <p><strong>Scheduled Date:</strong> {{ activity.scheduled_date }}</p>
+        <p><strong>Status:</strong> {{ activity.get_status_display }}</p>
+        
+        <form method="post" style="margin-top: 2rem;">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">Yes, Delete This Activity</button>
+                <a href="{% url 'calendar_detail' activity.pk %}" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

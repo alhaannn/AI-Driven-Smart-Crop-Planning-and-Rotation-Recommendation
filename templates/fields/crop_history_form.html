@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}📝{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ <a href="{% url 'crop_history_list' %}">Crop History</a></span>
+    <span>/ {{ title }}</span>
+{% endblock %}
+
+{% block content %}
+    <div class="card" style="max-width: 900px; margin: 0 auto;">
+        <div class="card-header">
+            <h3 class="card-title">{{ title }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="auto-save-form" id="crop-history-form">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+                
+                <div class="grid grid-2 gap-2">
+                    <!-- Field Selection -->
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label" for="{{ form.field.id_for_label }}">
+                            {{ form.field.label }}
+                            <span style="color: #e74c3c;">*</span>
+                        </label>
+                        {{ form.field }}
+                        {% if form.field.errors %}
+                            <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                {{ form.field.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="muted-text">{{ form.field.help_text }}</small>
+                    </div>
+                    
+                    <!-- Crop Name -->
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.crop_name.id_for_label }}">
+                            {{ form.crop_name.label }}
+                            <span style="color: #e74c3c;">*</span>
+                        </label>
+                        {{ form.crop_name }}
+                        {% if form.crop_name.errors %}
+                            <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                {{ form.crop_name.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="muted-text">{{ form.crop_name.help_text }}</small>
+                    </div>
+                    
+                    <!-- Variety -->
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.variety.id_for_label }}">
+                            {{ form.variety.label }}
+                        </label>
+                        {{ form.variety }}
+                        {% if form.variety.errors %}
+                            <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                {{ form.variety.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="muted-text">{{ form.variety.help_text }}</small>
+                    </div>
+                    
+                    <!-- Planting Date -->
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.planting_date.id_for_label }}">
+                            {{ form.planting_date.label }}
+                            <span style="color: #e74c3c;">*</span>
+                        </label>
+                        {{ form.planting_date }}
+                        {% if form.planting_date.errors %}
+                            <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                {{ form.planting_date.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="muted-text">{{ form.planting_date.help_text }}</small>
+                    </div>
+                    
+                    <!-- Harvest Date -->
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.harvest_date.id_for_label }}">
+                            {{ form.harvest_date.label }}
+                            <span style="color: #e74c3c;">*</span>
+                        </label>
+                        {{ form.harvest_date }}
+                        {% if form.harvest_date.errors %}
+                            <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                {{ form.harvest_date.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="muted-text">{{ form.harvest_date.help_text }}</small>
+                    </div>
+                    
+                    <!-- Yield Amount -->
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label" for="{{ form.yield_amount.id_for_label }}">
+                            {{ form.yield_amount.label }}
+                            <span style="color: #e74c3c;">*</span>
+                        </label>
+                        {{ form.yield_amount }}
+                        {% if form.yield_amount.errors %}
+                            <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                {{ form.yield_amount.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="muted-text">{{ form.yield_amount.help_text }}</small>
+                    </div>
+                    
+                    <!-- Fertilizer Used -->
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.fertilizer_used.id_for_label }}">
+                            {{ form.fertilizer_used.label }}
+                        </label>
+                        {{ form.fertilizer_used }}
+                        {% if form.fertilizer_used.errors %}
+                            <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                {{ form.fertilizer_used.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="muted-text">{{ form.fertilizer_used.help_text }}</small>
+                    </div>
+                    
+                    <!-- Pesticide Used -->
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.pesticide_used.id_for_label }}">
+                            {{ form.pesticide_used.label }}
+                        </label>
+                        {{ form.pesticide_used }}
+                        {% if form.pesticide_used.errors %}
+                            <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                {{ form.pesticide_used.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="muted-text">{{ form.pesticide_used.help_text }}</small>
+                    </div>
+                    
+                    <!-- Weather Conditions -->
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label" for="{{ form.weather_conditions.id_for_label }}">
+                            {{ form.weather_conditions.label }}
+                        </label>
+                        {{ form.weather_conditions }}
+                        {% if form.weather_conditions.errors %}
+                            <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                {{ form.weather_conditions.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="muted-text">{{ form.weather_conditions.help_text }}</small>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label" for="{{ form.notes.id_for_label }}">
+                            {{ form.notes.label }}
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                            <div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">
+                                {{ form.notes.errors }}
+                            </div>
+                        {% endif %}
+                        <small class="muted-text">{{ form.notes.help_text }}</small>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-flex justify-between align-center" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid var(--medium-gray);">
+                    <a href="{% url 'crop_history_list' %}" class="btn btn-secondary">
+                        <span>←</span>
+                        <span>Cancel</span>
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <span>💾</span>
+                        <span>{{ button_text }}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ crop_history.crop_name }} - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}📝{% endblock %}
+{% block page_title %}{{ crop_history.crop_name }} History{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ <a href="{% url 'crop_history_list' %}">Crop History</a></span>
+    <span>/ {{ crop_history.crop_name }}</span>
+{% endblock %}
+
+{% block header_actions %}
+    <div class="d-flex gap-1">
+        <a href="{% url 'crop_history_update' crop_history.pk %}" class="btn btn-warning">
+            <span>✏️</span>
+            <span>Edit</span>
+        </a>
+        <a href="{% url 'crop_history_delete' crop_history.pk %}" class="btn btn-danger">
+            <span>🗑️</span>
+            <span>Delete</span>
+        </a>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-2">
+        <!-- Main Information -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Crop Information</h3>
+            </div>
+            <div class="card-body">
+                <table style="width: 100%;">
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Field</td>
+                        <td style="padding: 0.75rem;">
+                            <a href="{% url 'field_detail' crop_history.field.pk %}" style="color: var(--secondary-green); font-weight: 600;">
+                                {{ crop_history.field.name }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Crop Name</td>
+                        <td style="padding: 0.75rem; font-weight: 600;">{{ crop_history.crop_name }}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Variety</td>
+                        <td style="padding: 0.75rem;">{{ crop_history.variety|default:"-" }}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Planting Date</td>
+                        <td style="padding: 0.75rem;">{{ crop_history.planting_date|date:"F d, Y" }}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Harvest Date</td>
+                        <td style="padding: 0.75rem;">{{ crop_history.harvest_date|date:"F d, Y" }}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--medium-gray);">
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Growing Days</td>
+                        <td style="padding: 0.75rem;"><span class="badge badge-info">{{ growing_days }} days</span></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-green);">Created</td>
+                        <td style="padding: 0.75rem;">{{ crop_history.created_at|date:"F d, Y" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Yield Information -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Yield & Production</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-2 gap-2">
+                    <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #6faa3e 0%, #4a7c2c 100%); border-radius: var(--radius-lg); color: white;">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📊</div>
+                        <h3 style="color: white; margin: 0;">{{ crop_history.yield_amount }}</h3>
+                        <p style="color: rgba(255,255,255,0.9); margin: 0;">kg per acre</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #4a7c2c 0%, #2d5016 100%); border-radius: var(--radius-lg); color: white;">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🌾</div>
+                        <h3 style="color: white; margin: 0;">{{ total_yield|floatformat:2 }}</h3>
+                        <p style="color: rgba(255,255,255,0.9); margin: 0;">Total kg (field)</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1.5rem; padding: 1rem; background: var(--light-gray); border-radius: var(--radius-md);">
+                    <p style="margin: 0; color: var(--text-secondary);">
+                        <strong>Field Size:</strong> {{ crop_history.field.size_acres }} acres
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Inputs Used -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Inputs Used</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label style="font-weight: 600; color: var(--primary-green);">Fertilizers</label>
+                    <p style="padding: 0.75rem; background: var(--light-gray); border-radius: var(--radius-md); margin: 0.5rem 0;">
+                        {{ crop_history.fertilizer_used|default:"None specified" }}
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label style="font-weight: 600; color: var(--primary-green);">Pesticides</label>
+                    <p style="padding: 0.75rem; background: var(--light-gray); border-radius: var(--radius-md); margin: 0.5rem 0;">
+                        {{ crop_history.pesticide_used|default:"None specified" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Weather & Notes -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Additional Information</h3>
+            </div>
+            <div class="card-body">
+                {% if crop_history.weather_conditions %}
+                    <div class="form-group">
+                        <label style="font-weight: 600; color: var(--primary-green);">Weather Conditions</label>
+                        <p style="padding: 0.75rem; background: var(--light-gray); border-radius: var(--radius-md); margin: 0.5rem 0;">
+                            {{ crop_history.weather_conditions }}
+                        </p>
+                    </div>
+                {% endif %}
+                
+                {% if crop_history.notes %}
+                    <div class="form-group">
+                        <label style="font-weight: 600; color: var(--primary-green);">Notes</label>
+                        <p style="padding: 0.75rem; background: var(--light-gray); border-radius: var(--radius-md); margin: 0.5rem 0;">
+                            {{ crop_history.notes }}
+                        </p>
+                    </div>
+                {% endif %}
+                
+                {% if not crop_history.weather_conditions and not crop_history.notes %}
+                    <p class="muted-text text-center">No additional information recorded.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

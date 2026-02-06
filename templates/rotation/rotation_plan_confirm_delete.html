@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Rotation Plan{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>⚠️ Delete Rotation Plan</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <strong>Warning:</strong> You are about to delete this rotation plan. This action cannot be undone!
+        </div>
+        
+        <h2>{{ plan.name }}</h2>
+        <p><strong>Field:</strong> {{ plan.field.name }}</p>
+        <p><strong>Timeline:</strong> {{ plan.start_year }} - {{ plan.get_end_year }} ({{ plan.duration_years }} years)</p>
+        <p><strong>Status:</strong> {{ plan.get_status_display }}</p>
+        
+        <div style="margin-top: 1.5rem; padding: 1rem; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+            <p style="margin: 0;"><strong>This will also delete:</strong></p>
+            <ul style="margin: 0.5rem 0 0 1.5rem;">
+                <li>{{ sequences_count }} crop sequence(s)</li>
+                <li>{{ benefits_count }} expected benefit(s)</li>
+            </ul>
+        </div>
+        
+        <form method="post" style="margin-top: 2rem;">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">Yes, Delete This Plan</button>
+                <a href="{% url 'rotation:plan_detail' plan.pk %}" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

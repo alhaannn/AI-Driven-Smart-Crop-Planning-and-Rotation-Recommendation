@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendar Detail{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📅 {{ activity.get_activity_type_display }}</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="grid-2">
+            <div>
+                <h3>Activity Information</h3>
+                <p><strong>Type:</strong> {{ activity.get_activity_type_display }}</p>
+                <p><strong>Crop:</strong> {{ activity.crop_name }}</p>
+                {% if activity.variety %}<p><strong>Variety:</strong> {{ activity.variety }}</p>{% endif %}
+                <p><strong>Field:</strong> {{ activity.field.name }}</p>
+                <p><strong>Status:</strong> <span class="badge">{{ activity.get_status_display }}</span></p>
+            </div>
+            
+            <div>
+                <h3>Schedule</h3>
+                <p><strong>Scheduled Date:</strong> {{ activity.scheduled_date }}</p>
+                {% if activity.end_date %}<p><strong>End Date:</strong> {{ activity.end_date }}</p>{% endif %}
+                {% if activity.estimated_duration_days %}<p><strong>Duration:</strong> {{ activity.estimated_duration_days }} days</p>{% endif %}
+                
+                {% if not activity.is_overdue and activity.days_until >= 0 %}
+                <p><strong>Days Until:</strong> {{ activity.days_until }} days</p>
+                {% elif activity.is_overdue %}
+                <p><strong>Overdue By:</strong> <span class="badge badge-danger">{{ activity.days_until|abs }} days</span></p>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if activity.description %}
+        <div style="margin-top: 1.5rem;">
+            <h3>Description</h3>
+            <p>{{ activity.description }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="form-actions" style="margin-top: 1.5rem;">
+            {% if activity.status != 'completed' %}
+            <a href="{% url 'mark_complete' activity.pk %}" class="btn btn-success">Mark Complete</a>
+            {% endif %}
+            <a href="{% url 'calendar_update' activity.pk %}" class="btn">Edit</a>
+            <a href="{% url 'calendar_delete' activity.pk %}" class="btn btn-danger">Delete</a>
+            <a href="{% url 'calendar_view' %}" class="btn">Back to Calendar</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

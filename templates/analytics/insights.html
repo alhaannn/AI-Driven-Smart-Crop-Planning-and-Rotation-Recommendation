@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Insights{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>💡 AI-Powered Insights & Recommendations</h1>
+    <p>Data-driven recommendations for optimal farm management</p>
+</div>
+
+<!-- Summary Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ total_insights }}</div>
+            <div class="stat-label">Total Insights</div>
+        </div>
+    </div>
+    
+    <div class="stat-card" style="border-color: #f44336;">
+        <div class="stat-icon">🚨</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ high_priority }}</div>
+            <div class="stat-label">High Priority</div>
+        </div>
+    </div>
+    
+    <div class="stat-card" style="border-color: #ff9800;">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ medium_priority }}</div>
+            <div class="stat-label">Medium Priority</div>
+        </div>
+    </div>
+    
+    <div class="stat-card" style="border-color: #4caf50;">
+        <div class="stat-icon">ℹ️</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ low_priority }}</div>
+            <div class="stat-label">Low Priority</div>
+        </div>
+    </div>
+</div>
+
+<!-- Insights by Category -->
+{% for category, insights_list in insights_by_category.items %}
+{% if insights_list %}
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>{{ category|title|replace:"_":" " }}</h2>
+    </div>
+    <div class="card-body">
+        <div class="insights-grid">
+            {% for insight in insights_list %}
+            <div class="insight-card insight-{{ insight.type }} priority-{{ insight.priority }}">
+                <div class="insight-header">
+                    <span class="insight-icon">
+                        {% if insight.type == 'warning' %}⚠️
+                        {% elif insight.type == 'alert' %}🚨
+                        {% else %}💡{% endif %}
+                    </span>
+                    <span class="insight-category">{{ insight.category|title }}</span>
+                    <span class="badge badge-{{ insight.priority }}">{{ insight.priority|upper }}</span>
+                </div>
+                <div class="insight-message">
+                    {% if insight.field %}<strong>{{ insight.field.name }}:</strong> {% endif %}
+                    {{ insight.message }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<!-- Empty State -->
+{% if total_insights == 0 %}
+<div class="empty-state" style="margin-top: 2rem;">
+    <div class="empty-icon">💡</div>
+    <h2>No Insights Available</h2>
+    <p>Insights will be generated as you add more data to the system.</p>
+</div>
+{% endif %}
+
+<style>
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.insight-card {
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid;
+    background: white;
+}
+
+.insight-card.insight-warning {
+    border-left-color: #ff9800;
+    background: #fff3e0;
+}
+
+.insight-card.insight-alert {
+    border-left-color: #f44336;
+    background: #ffebee;
+}
+
+.insight-card.insight-info {
+    border-left-color: #2196f3;
+    background: #e3f2fd;
+}
+
+.insight-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.insight-icon {
+    font-size: 1.25rem;
+}
+
+.insight-category {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #666;
+    flex: 1;
+}
+
+.insight-message {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+.badge-high {
+    background: #f44336;
+    color: white;
+}
+
+.badge-medium {
+    background: #ff9800;
+    color: white;
+}
+
+.badge-low {
+    background: #4caf50;
+    color: white;
+}
+</style>
+
+{% endblock %}

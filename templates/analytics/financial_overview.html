@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Financial Overview{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>💰 Financial Overview</h1>
+            <p>Track income, expenses, and profitability</p>
+        </div>
+        <a href="{% url 'analytics:financial_create' %}" class="btn btn-primary">➕ Add Transaction</a>
+    </div>
+</div>
+
+<!-- Filter Form -->
+<div class="card">
+    <div class="card-body">
+        <form method="get">
+            <div class="grid-3">
+                {{ filter_form.start_date }}
+                {{ filter_form.end_date }}
+                {{ filter_form.field }}
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Filter</button>
+        </form>
+    </div>
+</div>
+
+<!-- Financial Summary -->
+<div class="stats-grid" style="margin-top: 2rem;">
+    <div class="stat-card stat-income">
+        <div class="stat-icon">📈</div>
+        <div class="stat-content">
+            <div class="stat-value">${{ financial_summary.total_income|floatformat:0 }}</div>
+            <div class="stat-label">Total Income</div>
+        </div>
+    </div>
+    
+    <div class="stat-card stat-expense">
+        <div class="stat-icon">📉</div>
+        <div class="stat-content">
+            <div class="stat-value">${{ financial_summary.total_expenses|floatformat:0 }}</div>
+            <div class="stat-label">Total Expenses</div>
+        </div>
+    </div>
+    
+    <div class="stat-card {% if financial_summary.net_profit >= 0 %}stat-positive{% else %}stat-negative{% endif %}">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+            <div class="stat-value">${{ financial_summary.net_profit|floatformat:0 }}</div>
+            <div class="stat-label">Net Profit</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+            <div class="stat-value">{{ financial_summary.profit_margin|floatformat:1 }}%</div>
+            <div class="stat-label">Profit Margin</div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Records -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>Recent Transactions</h2>
+    </div>
+    <div class="card-body">
+        {% if records %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.date }}</td>
+                    <td><span class="badge badge-{{ record.transaction_type }}">{{ record.get_transaction_type_display }}</span></td>
+                    <td>{{ record.get_category_display }}</td>
+                    <td>${{ record.amount }}</td>
+                    <td>{{ record.description|truncatewords:10 }}</td>
+                    <td>
+                        <a href="{% url 'analytics:financial_update' record.pk %}" class="btn btn-sm">Edit</a>
+                        <a href="{% url 'analytics:financial_delete' record.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No financial records found. <a href="{% url 'analytics:financial_create' %}">Add one</a></p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.stat-card.stat-positive { background: linear-gradient(135deg, #d4edda 0%, #ffffff 100%); border-color: #28a745; }
+.stat-card.stat-negative { background: linear-gradient(135deg, #f8d7da 0%, #ffffff 100%); border-color: #dc3545; }
+.stat-card.stat-income { background: linear-gradient(135deg, #d1ecf1 0%, #ffffff 100%); }
+.stat-card.stat-expense { background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%); }
+</style>
+
+{% endblock %}

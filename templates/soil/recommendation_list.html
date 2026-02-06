@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Nutrient Recommendations - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}📋{% endblock %}
+{% block page_title %}Nutrient Recommendations{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ Nutrient Recommendations</span>
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">All Nutrient Recommendations</h3>
+            <span class="badge badge-success">{{ recommendations.count }} total</span>
+        </div>
+        <div class="card-body">
+            {% if recommendations %}
+                {% for rec in recommendations %}
+                    <div class="card mb-2" style="border-left: 4px solid {% if rec.priority >= 8 %}#e74c3c{% elif rec.priority >= 5 %}#f4c430{% else %}#6faa3e{% endif %};">
+                        <div class="card-body">
+                            <div class="d-flex justify-between align-center mb-1">
+                                <div>
+                                    <h4 style="margin: 0; color: var(--primary-green);">{{ rec.get_nutrient_display }}</h4>
+                                    <p style="margin: 0.25rem 0; font-size: 0.9rem; color: var(--text-secondary);">
+                                        Field: <a href="{% url 'field_detail' rec.soil_analysis.field.pk %}">{{ rec.soil_analysis.field.name }}</a> | 
+                                        Analysis: <a href="{% url 'soil_analysis_detail' rec.soil_analysis.pk %}">{{ rec.soil_analysis.analysis_date|date:"M d, Y" }}</a>
+                                    </p>
+                                </div>
+                                <div class="d-flex gap-1 align-center">
+                                    <span class="badge {% if rec.current_level == 'low' %}badge-danger{% elif rec.current_level == 'medium' %}badge-warning{% else %}badge-success{% endif %}">
+                                        {{ rec.get_current_level_display }}
+                                    </span>
+                                    <span class="badge badge-info">Priority: {{ rec.priority }}/10</span>
+                                </div>
+                            </div>
+                            <p style="margin: 0.5rem 0; color: var(--text-secondary);">{{ rec.recommended_action }}</p>
+                            {% if rec.application_rate %}
+                                <div style="margin-top: 0.5rem; padding: 0.5rem; background: var(--light-gray); border-radius: var(--radius-sm);">
+                                    <strong>Application Rate:</strong> {{ rec.application_rate }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center p-3">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">📋</div>
+                    <h4>No Recommendations Yet</h4>
+                    <p class="muted-text">Add soil analyses to get automated nutrient recommendations.</p>
+                    <a href="{% url 'soil_analysis_create' %}" class="btn btn-primary mt-1">
+                        <span>➕</span>
+                        <span>Add Soil Analysis</span>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

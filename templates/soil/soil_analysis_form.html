@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}🌍{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ <a href="{% url 'soil_analysis_list' %}">Soil Analysis</a></span>
+    <span>/ {{ title }}</span>
+{% endblock %}
+
+{% block content %}
+    <div class="card" style="max-width: 1000px; margin: 0 auto;">
+        <div class="card-header">
+            <h3 class="card-title">{{ title }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="auto-save-form" id="soil-analysis-form">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+                
+                <!-- Basic Information -->
+                <h4 style="color: var(--primary-green); margin-bottom: 1rem;">Basic Information</h4>
+                <div class="grid grid-2 gap-2 mb-2">
+                    <div class="form-group">
+                        <label class="form-label">{{ form.field.label }} <span style="color: #e74c3c;">*</span></label>
+                        {{ form.field }}
+                        {% if form.field.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.field.errors }}</div>{% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">{{ form.analysis_date.label }} <span style="color: #e74c3c;">*</span></label>
+                        {{ form.analysis_date }}
+                        {% if form.analysis_date.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.analysis_date.errors }}</div>{% endif %}
+                    </div>
+                </div>
+                
+                <!-- pH and Organic Matter -->
+                <h4 style="color: var(--primary-green); margin: 1.5rem 0 1rem;">pH and Organic Matter</h4>
+                <div class="grid grid-2 gap-2 mb-2">
+                    <div class="form-group">
+                        <label class="form-label">{{ form.ph_level.label }} <span style="color: #e74c3c;">*</span></label>
+                        {{ form.ph_level }}
+                        {% if form.ph_level.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.ph_level.errors }}</div>{% endif %}
+                        <small class="muted-text">Normal range: 6.0-7.5</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">{{ form.organic_matter.label }} <span style="color: #e74c3c;">*</span></label>
+                        {{ form.organic_matter }}
+                        {% if form.organic_matter.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.organic_matter.errors }}</div>{% endif %}
+                        <small class="muted-text">Good: 3-5%</small>
+                    </div>
+                </div>
+                
+                <!-- Macronutrients (NPK) -->
+                <h4 style="color: var(--primary-green); margin: 1.5rem 0 1rem;">Macronutrients (N-P-K)</h4>
+                <div class="grid grid-3 gap-2 mb-2">
+                    <div class="form-group">
+                        <label class="form-label">{{ form.nitrogen_ppm.label }} <span style="color: #e74c3c;">*</span></label>
+                        {{ form.nitrogen_ppm }}
+                        {% if form.nitrogen_ppm.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.nitrogen_ppm.errors }}</div>{% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">{{ form.phosphorus_ppm.label }} <span style="color: #e74c3c;">*</span></label>
+                        {{ form.phosphorus_ppm }}
+                        {% if form.phosphorus_ppm.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.phosphorus_ppm.errors }}</div>{% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">{{ form.potassium_ppm.label }} <span style="color: #e74c3c;">*</span></label>
+                        {{ form.potassium_ppm }}
+                        {% if form.potassium_ppm.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.potassium_ppm.errors }}</div>{% endif %}
+                    </div>
+                </div>
+                
+                <!-- Micronutrients (Optional) -->
+                <h4 style="color: var(--primary-green); margin: 1.5rem 0 1rem;">Micronutrients (Optional)</h4>
+                <div class="grid grid-3 gap-2 mb-2">
+                    <div class="form-group">
+                        <label class="form-label">{{ form.calcium_ppm.label }}</label>
+                        {{ form.calcium_ppm }}
+                        {% if form.calcium_ppm.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.calcium_ppm.errors }}</div>{% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">{{ form.magnesium_ppm.label }}</label>
+                        {{ form.magnesium_ppm }}
+                        {% if form.magnesium_ppm.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.magnesium_ppm.errors }}</div>{% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">{{ form.sulfur_ppm.label }}</label>
+                        {{ form.sulfur_ppm }}
+                        {% if form.sulfur_ppm.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.sulfur_ppm.errors }}</div>{% endif %}
+                    </div>
+                </div>
+                
+                <!-- Additional Measurements -->
+                <h4 style="color: var(--primary-green); margin: 1.5rem 0 1rem;">Additional Measurements</h4>
+                <div class="grid grid-2 gap-2 mb-2">
+                    <div class="form-group">
+                        <label class="form-label">{{ form.cec.label }}</label>
+                        {{ form.cec }}
+                        {% if form.cec.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.cec.errors }}</div>{% endif %}
+                        <small class="muted-text">Cation Exchange Capacity</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">{{ form.moisture_content.label }}</label>
+                        {{ form.moisture_content }}
+                        {% if form.moisture_content.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.moisture_content.errors }}</div>{% endif %}
+                    </div>
+                </div>
+                
+                <!-- Lab and Notes -->
+                <h4 style="color: var(--primary-green); margin: 1.5rem 0 1rem;">Laboratory Information</h4>
+                <div class="grid grid-2 gap-2 mb-2">
+                    <div class="form-group">
+                        <label class="form-label">{{ form.lab_name.label }}</label>
+                        {{ form.lab_name }}
+                        {% if form.lab_name.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.lab_name.errors }}</div>{% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">{{ form.notes.label }}</label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}<div style="color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem;">{{ form.notes.errors }}</div>{% endif %}
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-flex justify-between align-center" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid var(--medium-gray);">
+                    <a href="{% url 'soil_analysis_list' %}" class="btn btn-secondary">
+                        <span>←</span>
+                        <span>Cancel</span>
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <span>💾</span>
+                        <span>{{ button_text }}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

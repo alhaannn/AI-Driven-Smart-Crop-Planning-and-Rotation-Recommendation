@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Crop History - Smart Crop Planner{% endblock %}
+
+{% block page_icon %}📝{% endblock %}
+{% block page_title %}Crop History{% endblock %}
+
+{% block breadcrumb %}
+    <span>/ Crop History</span>
+{% endblock %}
+
+{% block header_actions %}
+    <a href="{% url 'crop_history_create' %}" class="btn btn-primary">
+        <span>➕</span>
+        <span>Add Crop Record</span>
+    </a>
+{% endblock %}
+
+{% block content %}
+    <!-- Filter Section -->
+    {% if fields %}
+        <div class="card mb-2">
+            <div class="card-body">
+                <form method="get" class="d-flex gap-2 align-center">
+                    <label for="field-filter" style="font-weight: 600; color: var(--primary-green);">Filter by Field:</label>
+                    <select name="field" id="field-filter" class="form-control form-select" style="max-width: 300px;" onchange="this.form.submit()">
+                        <option value="">All Fields</option>
+                        {% for field in fields %}
+                            <option value="{{ field.pk }}" {% if selected_field == field.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ field.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Crop History Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">All Crop Records</h3>
+            <span class="badge badge-success">{{ crop_histories.count }} record{{ crop_histories.count|pluralize }}</span>
+        </div>
+        <div class="card-body">
+            {% if crop_histories %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Crop</th>
+                            <th>Variety</th>
+                            <th>Planting Date</th>
+                            <th>Harvest Date</th>
+                            <th>Yield (kg/acre)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for history in crop_histories %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'field_detail' history.field.pk %}" style="color: var(--primary-green); font-weight: 600;">
+                                        {{ history.field.name }}
+                                    </a>
+                                </td>
+                                <td style="font-weight: 600;">{{ history.crop_name }}</td>
+                                <td>{{ history.variety|default:"-" }}</td>
+                                <td>{{ history.planting_date|date:"M d, Y" }}</td>
+                                <td>{{ history.harvest_date|date:"M d, Y" }}</td>
+                                <td><span class="badge badge-success">{{ history.yield_amount }}</span></td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a href="{% url 'crop_history_detail' history.pk %}" class="btn btn-secondary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">
+                                            View
+                                        </a>
+                                        <a href="{% url 'crop_history_update' history.pk %}" class="btn btn-warning" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">
+                                            Edit
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="text-center p-3">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">📝</div>
+                    <h4>No Crop History Records</h4>
+                    <p class="muted-text">Start tracking your crop history by adding your first record.</p>
+                    <a href="{% url 'crop_history_create' %}" class="btn btn-primary mt-1">
+                        <span>➕</span>
+                        <span>Add First Record</span>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

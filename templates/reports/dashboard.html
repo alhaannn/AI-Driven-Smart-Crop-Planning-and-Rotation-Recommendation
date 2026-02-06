@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports & Export{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📊 Reports & Data Export</h1>
+    <p>Generate professional PDF reports and export data to CSV/Excel</p>
+</div>
+
+<!-- Quick Export Section -->
+<div class="card">
+    <div class="card-header">
+        <h2>⚡ Quick Export Options</h2>
+    </div>
+    <div class="card-body">
+        <div class="grid-3">
+            <div class="export-card">
+                <div class="export-icon">📄</div>
+                <h3>Farm Summary PDF</h3>
+                <p>Complete overview of all fields</p>
+                <a href="{% url 'reports:export_all_fields_pdf' %}" class="btn btn-primary" target="_blank">
+                    📥 Download PDF
+                </a>
+            </div>
+            
+            <div class="export-card">
+                <div class="export-icon">📋</div>
+                <h3>All Fields CSV</h3>
+                <p>All field data in spreadsheet format</p>
+                <a href="{% url 'reports:export_fields_csv' %}" class="btn btn-success">
+                    📥 Download CSV
+                </a>
+            </div>
+            
+            <div class="export-card">
+                <div class="export-icon">📊</div>
+                <h3>All Fields Excel</h3>
+                <p>Professional Excel format with formatting</p>
+                <a href="{% url 'reports:export_fields_excel' %}" class="btn btn-primary">
+                    📥 Download Excel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Field-Specific Reports -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>🌾 Field-Specific Reports</h2>
+    </div>
+    <div class="card-body">
+        {% if fields %}
+        <div class="fields-report-grid">
+            {% for field in fields %}
+            <div class="field-report-card">
+                <h3>{{ field.name }}</h3>
+                <p class="field-location">📍 {{ field.location }}</p>
+                <p class="field-size">{{ field.size_acres }} acres • {{ field.soil_type }}</p>
+                
+                <div class="report-actions">
+                    <div class="report-section">
+                        <strong>📄 PDF Reports:</strong>
+                        <div class="button-group">
+                            <a href="{% url 'reports:export_field_pdf' field.pk %}" class="btn btn-sm" target="_blank">
+                                Field Report
+                            </a>
+                            <a href="{% url 'reports:export_financial_pdf' field.pk %}" class="btn btn-sm" target="_blank">
+                                Financial Report
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="report-section" style="margin-top: 1rem;">
+                        <strong>📋 CSV Exports:</strong>
+                        <div class="button-group">
+                            <a href="{% url 'reports:export_field_crops_csv' field.pk %}" class="btn btn-sm btn-success">
+                                Crop History
+                            </a>
+                            <a href="{% url 'reports:export_field_soil_csv' field.pk %}" class="btn btn-sm btn-success">
+                                Soil Analysis
+                            </a>
+                            <a href="{% url 'reports:export_field_financial_csv' field.pk %}" class="btn btn-sm btn-success">
+                                Financials
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No fields available. <a href="{% url 'field_create' %}">Create a field</a> to generate reports.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- All Data Exports -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>📦 Bulk Data Exports</h2>
+    </div>
+    <div class="card-body">
+        <div class="grid-4">
+            <div class="bulk-export-item">
+                <span class="export-icon">🌾</span>
+                <strong>All Crop History</strong>
+                <a href="{% url 'reports:export_crops_csv' %}" class="btn btn-sm btn-success">CSV</a>
+            </div>
+            
+            <div class="bulk-export-item">
+                <span class="export-icon">🧪</span>
+                <strong>All Soil Data</strong>
+                <a href="{% url 'reports:export_soil_csv' %}" class="btn btn-sm btn-success">CSV</a>
+            </div>
+            
+            <div class="bulk-export-item">
+                <span class="export-icon">💰</span>
+                <strong>All Financial</strong>
+                <a href="{% url 'reports:export_financial_csv' %}" class="btn btn-sm btn-success">CSV</a>
+                <a href="{% url 'reports:export_financial_excel' %}" class="btn btn-sm btn-primary">Excel</a>
+            </div>
+            
+            <div class="bulk-export-item">
+                <span class="export-icon">📊</span>
+                <strong>All Fields</strong>
+                <a href="{% url 'reports:export_fields_csv' %}" class="btn btn-sm btn-success">CSV</a>
+                <a href="{% url 'reports:export_fields_excel' %}" class="btn btn-sm btn-primary">Excel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Guide -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2>📖 Export Guide</h2>
+    </div>
+    <div class="card-body">
+        <div class="grid-2">
+            <div>
+                <h3>📄 PDF Reports</h3>
+                <ul>
+                    <li><strong>Field Report:</strong> Complete field overview with crop history and soil analysis</li>
+                    <li><strong>Financial Report:</strong> Detailed income/expense breakdown with summary</li>
+                    <li><strong>Farm Summary:</strong> All fields summary in one document</li>
+                </ul>
+                <p><strong>Best for:</strong> Printing, presentations, record-keeping</p>
+            </div>
+            
+            <div>
+                <h3>📊 CSV & Excel Exports</h3>
+                <ul>
+                    <li><strong>CSV:</strong> Simple format, opens in Excel/Google Sheets</li>
+                    <li><strong>Excel:</strong> Professional formatting with formulas and styling</li>
+                    <li><strong>Bulk Exports:</strong> All data across all fields</li>
+                </ul>
+                <p><strong>Best for:</strong> Data analysis, backup, sharing with accountants</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.export-card {
+    padding: 2rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    text-align: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transition: all 0.3s ease;
+}
+
+.export-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border-color: var(--primary-color);
+}
+
+.export-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.export-card h3 {
+    margin: 0.5rem 0;
+    color: var(--text-color);
+}
+
+.export-card p {
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.fields-report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.field-report-card {
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: white;
+}
+
+.field-report-card h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--primary-color);
+}
+
+.field-location {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0.25rem 0;
+}
+
+.field-size {
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.report-actions {
+    margin-top: 1rem;
+}
+
+.report-section {
+    margin: 0.75rem 0;
+}
+
+.report-section strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.bulk-export-item {
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.bulk-export-item .export-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.bulk-export-item strong {
+    display: block;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.bulk-export-item .btn {
+    margin: 0.25rem;
+}
+
+.card-body ul {
+    padding-left: 1.5rem;
+}
+
+.card-body li {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+</style>
+
+{% endblock %}

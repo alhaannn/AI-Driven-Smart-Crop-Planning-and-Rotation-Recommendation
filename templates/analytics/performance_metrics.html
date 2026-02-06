@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Performance Metrics{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📊 Performance Metrics</h1>
+    <p>Compare field performance across key indicators</p>
+</div>
+
+<!-- Field Performance Cards -->
+{% if field_performance %}
+<div class="grid-2" style="gap: 2rem;">
+    {% for data in field_performance %}
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ data.field.name }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="metrics-grid">
+                {% for metric_type, metric in data.metrics.items %}
+                <div class="metric-card">
+                    <div class="metric-type">{{ metric.get_metric_type_display }}</div>
+                    <div class="metric-score" style="color: {{ metric.get_trend_color }};">
+                        {{ metric.score|floatformat:1 }}%
+                    </div>
+                    <div class="metric-level">{{ metric.get_performance_level }}</div>
+                    <div class="metric-date">{{ metric.measurement_date }}</div>
+                </div>
+                {% empty %}
+                <p>No metrics available for this field.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h2>No Performance Metrics</h2>
+    <p>Performance metrics will be calculated automatically as you use the system.</p>
+</div>
+{% endif %}
+
+<style>
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.metric-card {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.metric-type {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.metric-score {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.metric-level {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.metric-date {
+    font-size: 0.75rem;
+    color: #999;
+}
+</style>
+
+{% endblock %}
